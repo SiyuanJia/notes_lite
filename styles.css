@@ -28,28 +28,14 @@
     padding: 0;
     -webkit-user-select: text; /* Allow text selection on iOS */
     user-select: text; /* 标准属性，确保跨浏览器兼容 */
+    overflow-wrap: break-word; /* 防止长单词撑破布局 */
 }
 
-html {
+html, body {
     width: 100%;
+    max-width: 100%;
     overflow-x: hidden;
-    overflow-y: auto;
-}
-
-body {
-    width: 100%;
-    min-height: 100vh;
-    height: auto;
-    background-color: var(--bg-color);
-    color: var(--text-primary);
-    font-family: var(--font-sans);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    -webkit-user-select: text;
-    user-select: text;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: pan-y pan-x;
-    -webkit-overflow-scrolling: touch;
+    position: relative;
 }
 
 /* Enable text selection in markdown body for mobile */
@@ -815,18 +801,17 @@ body {
     }
     
     .block-handle-container {
-        left: -28px;
+        display: none !important; /* Hide drag handles on mobile to prevent horizontal overflow and clutter */
     }
     
-    .block-btn {
-        width: 28px;
-        height: 28px;
-        min-width: 28px;
-        min-height: 28px;
+    .editor {
+        padding-left: 0;
     }
     
     .markdown-body {
         padding: 0 4px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     #article-title {

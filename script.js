@@ -138,21 +138,23 @@ const app = {
             this.selectionTimer = setTimeout(() => {
                 const selection = document.getSelection();
                 if (selection.isCollapsed) {
-                    this.hidePopover();
+                    // Only hide if we aren't currently showing an image excerpt
+                    if (!this.state.selectedImage) {
+                        this.hidePopover();
+                    }
                 } else {
-                    // Re-evaluate showing popover on selection change (dragging handles)
-                    // We pass a dummy event since handleSelection mainly needs current selection state
-                    // But we need to be careful not to override if it was an image click
-                    if (!this.state.selectedImage) { 
-                        // Only auto-show for text if we have a valid range in markdown
-                        if (this.dom.markdownRender.contains(selection.anchorNode)) {
-                             const range = selection.getRangeAt(0);
-                             const rect = range.getBoundingClientRect();
-                             if (rect.width > 0) this.showPopover(rect);
-                        }
+                    // Only auto-show for text if we have a valid range in markdown
+                    if (this.dom.markdownRender.contains(selection.anchorNode)) {
+                         const range = selection.getRangeAt(0);
+                         const rect = range.getBoundingClientRect();
+                         if (rect.width > 0) {
+                             this.state.selectedImage = null;
+                             this.state.selectionRange = range.cloneRange();
+                             this.showPopover(rect);
+                         }
                     }
                 }
-            }, 200);
+            }, 300); // Slightly longer debounce for mobile stability
         });
 
         // Markdown content specific interactions (Delegation)
@@ -164,10 +166,15 @@ const app = {
         });
 
         // Excerpt Button Action
-        this.dom.btnExcerpt.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent bubbling causing popover hide
+        // Use both touchstart and click to ensure responsiveness on all devices
+        const handleExcerptClick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             this.executeExcerpt();
-        });
+        };
+
+        this.dom.btnExcerpt.addEventListener('touchstart', handleExcerptClick, { passive: false });
+        this.dom.btnExcerpt.addEventListener('click', handleExcerptClick);
 
         // Editor Toolbar
         document.querySelectorAll('.tool-btn[data-cmd]').forEach(btn => {
@@ -518,15 +525,10 @@ const app = {
         // If click inside popover, ignore
         if (this.dom.popover.contains(e.target)) return;
 
-        // Support both Desktop (e.target check) and Mobile (implicit check)
-        // On mobile, selection often changes via native handles, so we rely more on selectionchange
-        // But clicking outside should hide it.
-        
         const selection = window.getSelection();
         
         // Only handle selection if it's within the markdown render area
         if (!this.dom.markdownRender.contains(selection.anchorNode)) {
-            // this.hidePopover(); // Don't hide immediately to allow clicking button
             return;
         }
 
@@ -534,7 +536,8 @@ const app = {
 
         if (selectedText.length > 0) {
             this.state.selectedImage = null; 
-            this.state.selectionRange = selection.getRangeAt(0);
+            // Use cloneRange to save a static snapshot of the selection
+            this.state.selectionRange = selection.getRangeAt(0).cloneRange();
             this.showPopover(this.state.selectionRange.getBoundingClientRect());
         } else {
             if (e.target.tagName !== 'IMG') {
