@@ -585,9 +585,17 @@ body {
     border-radius: 30px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     z-index: 1000;
-    transform: translate(-50%, -10px); /* Centered above selection */
+    transform: translateX(-50%) translateY(-10px); /* Centered above selection */
+    transition: top 0.2s, left 0.2s;
     animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
+/* Below version for mobile to avoid native selection menu */
+.popover.below {
+    transform: translateX(-50%) translateY(10px);
+    animation: popInBelow 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 .popover::after {
     content: '';
     position: absolute;
@@ -598,6 +606,13 @@ body {
     border-style: solid;
     border-color: var(--text-primary) transparent transparent transparent;
 }
+
+.popover.below::after {
+    top: auto;
+    bottom: 100%;
+    border-color: transparent transparent var(--text-primary) transparent;
+}
+
 .popover button {
     background: none;
     border: none;
@@ -611,8 +626,13 @@ body {
 }
 
 @keyframes popIn {
-    from { transform: translate(-50%, 10px) scale(0.8); opacity: 0; }
-    to { transform: translate(-50%, -10px) scale(1); opacity: 1; }
+    from { transform: translateX(-50%) translateY(0px) scale(0.8); opacity: 0; }
+    to { transform: translateX(-50%) translateY(-10px) scale(1); opacity: 1; }
+}
+
+@keyframes popInBelow {
+    from { transform: translateX(-50%) translateY(0px) scale(0.8); opacity: 0; }
+    to { transform: translateX(-50%) translateY(10px) scale(1); opacity: 1; }
 }
 
 .toast {

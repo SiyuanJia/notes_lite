@@ -555,16 +555,31 @@ const app = {
     showPopover(rect) {
         const popover = this.dom.popover;
         
-        // Calculate position (centered above selection)
-        // Add scroll offset
+        // Calculate position
         const scrollY = window.scrollY || window.pageYOffset;
         const scrollX = window.scrollX || window.pageXOffset;
 
-        const top = rect.top + scrollY - 10; // 10px spacing
-        const left = rect.left + scrollX + (rect.width / 2);
+        // Detection for mobile or small screens
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+            // Position BELOW the selection on mobile to avoid native browser menu
+            const top = rect.bottom + scrollY; 
+            const left = rect.left + scrollX + (rect.width / 2);
+            
+            popover.style.top = `${top}px`;
+            popover.style.left = `${left}px`;
+            popover.classList.add('below');
+        } else {
+            // Position ABOVE the selection on desktop (default)
+            const top = rect.top + scrollY; 
+            const left = rect.left + scrollX + (rect.width / 2);
+            
+            popover.style.top = `${top}px`;
+            popover.style.left = `${left}px`;
+            popover.classList.remove('below');
+        }
 
-        popover.style.top = `${top}px`;
-        popover.style.left = `${left}px`;
         popover.classList.remove('hidden');
     },
 
