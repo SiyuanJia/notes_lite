@@ -1,0 +1,113 @@
+/* Print Styling for PDF Export */
+@media print {
+    /* Set global background to white to avoid leaking colors */
+    html, body {
+        background-color: white !important;
+        background: white !important;
+    }
+
+    /* Hide everything by default */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Hide specific UI elements completely to avoid layout gaps */
+    .view-container, .toolbar, .toast, .popover, .home-header, .tabs-header, .article-nav, .article-header {
+        display: none !important;
+    }
+
+    /* Show only the Editor/Note content */
+    #view-article {
+        display: block !important;
+        visibility: visible !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+    }
+
+    /* We need to specifically target the editor tab content to be visible */
+    .tabs-container, .tabs-content, .tab-pane {
+        display: block !important;
+        visibility: visible !important;
+        box-shadow: none !important;
+        border: none !important;
+        min-height: auto !important;
+        background: white !important;
+        overflow: visible !important;
+    }
+
+    /* Hide the "Original Content" tab if we are in "Notes" tab */
+    #tab-content { display: none !important; }
+    #tab-notes { 
+        display: block !important; 
+        visibility: visible;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+    
+    /* Make editor children visible */
+    #editor, #editor * {
+        visibility: visible;
+    }
+
+    /* Editor styling for print */
+    #editor {
+        padding: 40px !important;
+        font-size: 12pt !important;
+        line-height: 1.6 !important;
+        color: black !important;
+        background: white !important;
+        margin: 0 !important;
+    }
+    
+    /* Ensure images break correctly */
+    img {
+        max-width: 100% !important;
+        page-break-inside: avoid;
+    }
+    
+    /* Add a Print Header */
+    #editor::before {
+        content: attr(data-print-title);
+        display: block;
+        font-family: var(--font-serif);
+        font-size: 24pt;
+        font-weight: bold;
+        margin: 0 0 10px 0;
+        border-bottom: none;
+        padding-bottom: 0;
+        visibility: visible;
+    }
+    
+    /* Style the dynamic source link */
+    #print-source-link {
+        display: block !important;
+        font-size: 10pt;
+        color: #666;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 10px;
+        visibility: visible;
+        font-family: var(--font-sans);
+    }
+
+    /* Excerpt Blocks */
+    .excerpt-wrapper {
+        page-break-inside: avoid;
+        border: none !important;
+        border-left: 4px solid #556B2F !important; /* Only left border to avoid doubling */
+        background-color: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .excerpt-block {
+        border: none !important; /* Ensure no additional borders in print */
+    }
+}

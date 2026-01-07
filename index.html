@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <!-- Fix WeChat Image Hotlinking -->
+    <meta name="referrer" content="no-referrer">
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' fill='%23556B2F'>♻</text></svg>">
+    <title>Organic Notes - 微信公众号摘录工具</title>
+    <!-- Fonts: System Fonts Stack -->
+    <style>
+        :root {
+            --font-serif: "Songti SC", "Noto Serif SC", "SimSun", serif;
+            --font-sans: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+        }
+    </style>
+    <!-- Icons (Domestic CDN) -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css">
+    <!-- Markdown Parser (Domestic CDN) -->
+    <script src="https://cdn.staticfile.org/marked/5.1.0/marked.min.js"></script>
+    <!-- Export Libs (Using CDN with fallback) -->
+    <script src="https://unpkg.com/html-docx-js@0.3.1/dist/html-docx.js"></script>
+    <script src="https://cdn.staticfile.org/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <!-- Image Generation (Domestic CDN) -->
+    <script src="https://cdn.staticfile.org/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <script src="https://cdn.staticfile.org/turndown/7.1.2/turndown.min.js"></script>
+    <script src="https://cdn.staticfile.org/Sortable/1.15.0/Sortable.min.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="print.css">
+</head>
+<body>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">
+        <i class="fa-solid fa-leaf"></i>
+        <span id="toast-msg"></span>
+    </div>
+
+    <!-- Popover for Excerpt -->
+    <div id="excerpt-popover" class="popover hidden">
+        <button id="btn-excerpt">
+            <i class="fa-solid fa-quote-left"></i> 摘录
+        </button>
+    </div>
+
+    <!-- View: Home -->
+    <div id="view-home" class="view-container active">
+        <header class="home-header">
+            <h1>Organic Notes</h1>
+            <p class="subtitle">让阅读与思考自然生长</p>
+        </header>
+
+        <section class="input-section">
+            <div class="input-wrapper">
+                <i class="fa-solid fa-link input-icon"></i>
+                <input type="text" id="url-input" placeholder="粘贴微信公众号文章链接...">
+                <button id="btn-crawl" class="btn-primary">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <section class="card-grid" id="card-grid">
+            <!-- Article cards will be injected here via JS -->
+        </section>
+    </div>
+
+    <!-- View: Article -->
+    <div id="view-article" class="view-container hidden">
+        <nav class="article-nav">
+            <button class="btn-back" id="btn-back">
+                <i class="fa-solid fa-chevron-left"></i> 返回
+            </button>
+            <div class="nav-actions">
+                <span class="save-status" id="save-status">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> <span id="save-text">已保存</span>
+                </span>
+            </div>
+        </nav>
+
+        <header class="article-header">
+            <h1 id="article-title">文章标题占位符</h1>
+            <a href="#" target="_blank" id="article-link" class="original-link">
+                <i class="fa-solid fa-link"></i> 查看原文链接
+            </a>
+        </header>
+
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="content">原文内容</button>
+                <button class="tab-btn" data-tab="notes">思考·记录</button>
+            </div>
+            
+            <div class="tabs-content">
+                <!-- Tab: Original Content -->
+                <div id="tab-content" class="tab-pane active">
+                    <div id="markdown-render" class="markdown-body">
+                        <!-- Rendered Markdown goes here -->
+                    </div>
+                </div>
+
+                <!-- Tab: Thinking & Recording -->
+                <div id="tab-notes" class="tab-pane">
+                    <div class="toolbar">
+                        <div class="tool-group">
+                            <!-- Headings & Text -->
+                            <button class="tool-btn" data-cmd="formatBlock" data-val="H1" title="大标题">H1</button>
+                            <button class="tool-btn" data-cmd="formatBlock" data-val="H2" title="中标题">H2</button>
+                            <button class="tool-btn" data-cmd="formatBlock" data-val="H3" title="小标题">H3</button>
+                            <button class="tool-btn" data-cmd="formatBlock" data-val="P" title="正文">T</button>
+                            <div class="divider"></div>
+                            <!-- Basic Format -->
+                            <button class="tool-btn" data-cmd="bold" title="加粗"><i class="fa-solid fa-bold"></i></button>
+                            <button class="tool-btn" data-cmd="italic" title="斜体"><i class="fa-solid fa-italic"></i></button>
+                            <button class="tool-btn" data-cmd="underline" title="下划线"><i class="fa-solid fa-underline"></i></button>
+                            <div class="divider"></div>
+                            <!-- Lists -->
+                            <button class="tool-btn" data-cmd="insertUnorderedList" title="无序列表"><i class="fa-solid fa-list-ul"></i></button>
+                            <button class="tool-btn" data-cmd="insertOrderedList" title="有序列表"><i class="fa-solid fa-list-ol"></i></button>
+                            <div class="divider"></div>
+                            <!-- Highlights -->
+                            <button class="tool-btn" data-cmd="hiliteColor" data-val="#D8E0D8" title="标记高亮"><i class="fa-solid fa-highlighter"></i></button>
+                            <button class="tool-btn" data-cmd="hiliteColor" data-val="transparent" title="清除背景色"><i class="fa-solid fa-eraser"></i></button>
+                        </div>
+                        <div class="tool-group right">
+                            <button class="tool-btn action-btn" id="btn-download-img" title="下载长图"><i class="fa-solid fa-image"></i></button>
+                            <button class="tool-btn action-btn" id="btn-export-docx" title="导出 Word"><i class="fa-solid fa-file-word"></i></button>
+                            <button class="tool-btn action-btn" id="btn-export-pdf" title="导出 PDF"><i class="fa-solid fa-file-pdf"></i></button>
+                            <div class="divider"></div>
+                            <button class="tool-btn action-btn" id="btn-copy-txt" data-tooltip="复制纯文本"><i class="fa-regular fa-file-lines"></i></button>
+                            <button class="tool-btn action-btn" id="btn-copy-md" data-tooltip="复制为Markdown，适配飞书"><i class="fa-solid fa-file-code"></i></button>
+                        </div>
+                    </div>
+                    <div id="editor" class="editor" contenteditable="true" placeholder="在此处开始你的思考，或从左侧摘录内容...">
+                        <p><i>我的思考笔记</i></p>
+                        <br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="mock_data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
