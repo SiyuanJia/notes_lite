@@ -416,12 +416,18 @@ body {
         position: fixed;
         right: 20px;
         bottom: 100px; /* Floating Action Button style, higher to avoid system nav/toast */
-        height: 44px;
-        border-radius: 22px;
-        padding: 0 20px;
+        width: 48px;   /* Make it a circle */
+        height: 48px;
+        border-radius: 50%;
+        padding: 0;
         font-weight: 500;
-        background: var(--text-primary); /* Darker for better contrast as FAB */
+        background: var(--accent-primary); /* Use theme color */
         z-index: 1000; /* Above everything */
+        box-shadow: 0 4px 15px rgba(85, 107, 47, 0.3); /* Themed shadow */
+    }
+    
+    .toolbar-toggle-btn i {
+        font-size: 1.2rem;
     }
     
     .toolbar.collapsed-mobile {

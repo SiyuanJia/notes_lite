@@ -132,9 +132,10 @@ const app = {
         if (this.dom.btnToggleToolbar) {
             this.dom.btnToggleToolbar.addEventListener('click', () => {
                 const isCollapsed = this.dom.editorToolbar.classList.toggle('collapsed-mobile');
+                // Toggle icon between Pen and X/Down
                 this.dom.btnToggleToolbar.innerHTML = isCollapsed ? 
-                    '<i class="fa-solid fa-pen-nib"></i> 编辑工具' : 
-                    '<i class="fa-solid fa-chevron-up"></i> 收起工具';
+                    '<i class="fa-solid fa-pen-nib"></i>' : 
+                    '<i class="fa-solid fa-chevron-down"></i>';
             });
         }
 
