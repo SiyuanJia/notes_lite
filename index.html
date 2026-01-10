@@ -103,7 +103,12 @@
 
                 <!-- Tab: Thinking & Recording -->
                 <div id="tab-notes" class="tab-pane">
-                    <div class="toolbar">
+                    <!-- Mobile Toolbar Toggle -->
+                    <button id="btn-toggle-toolbar" class="mobile-only-flex toolbar-toggle-btn">
+                        <i class="fa-solid fa-pen-nib"></i> 编辑工具
+                    </button>
+                    
+                    <div class="toolbar collapsed-mobile" id="editor-toolbar">
                         <div class="tool-group">
                             <!-- Headings & Text -->
                             <button class="tool-btn" data-cmd="formatBlock" data-val="H1" title="大标题">H1</button>

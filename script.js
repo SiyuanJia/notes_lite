@@ -4,7 +4,12 @@ const app = {
         currentArticle: null,
         currentNoteKey: null,
         selectionRange: null, // Store range for text excerpt
-        selectedImage: null   // Store element for image excerpt
+        selectedImage: null,   // Store element for image excerpt
+        tabScrollPositions: {
+            content: 0,
+            notes: 0
+        },
+        currentTab: 'content'
     },
 
     init() {
@@ -109,7 +114,9 @@ const app = {
             saveStatus: document.getElementById('save-status'),
             saveText: document.getElementById('save-text'),
             tabs: document.querySelectorAll('.tab-btn'),
-            tabPanes: document.querySelectorAll('.tab-pane')
+            tabPanes: document.querySelectorAll('.tab-pane'),
+            btnToggleToolbar: document.getElementById('btn-toggle-toolbar'),
+            editorToolbar: document.getElementById('editor-toolbar')
         };
     },
 
@@ -120,6 +127,16 @@ const app = {
             if (e.key === 'Enter') this.handleCrawl();
         });
         this.dom.btnBack.addEventListener('click', () => this.switchView('home'));
+
+        // Toolbar Toggle (Mobile)
+        if (this.dom.btnToggleToolbar) {
+            this.dom.btnToggleToolbar.addEventListener('click', () => {
+                const isCollapsed = this.dom.editorToolbar.classList.toggle('collapsed-mobile');
+                this.dom.btnToggleToolbar.innerHTML = isCollapsed ? 
+                    '<i class="fa-solid fa-pen-nib"></i> 编辑工具' : 
+                    '<i class="fa-solid fa-chevron-up"></i> 收起工具';
+            });
+        }
 
         // Tabs
         this.dom.tabs.forEach(btn => {
@@ -499,15 +516,26 @@ const app = {
             this.renderArticleList(); // Re-render in case of updates
             this.state.currentArticle = null;
             this.state.currentNoteKey = null;
+            // Reset tab scroll positions when going back home
+            this.state.tabScrollPositions = { content: 0, notes: 0 };
+            this.state.currentTab = 'content';
         } else {
             this.dom.viewHome.classList.add('hidden');
             this.dom.viewArticle.classList.remove('hidden');
             document.title = this.state.currentArticle ? this.state.currentArticle.title : 'Article View';
+            
+            // Initial state for tab positions and toolbar toggle
+            if (this.dom.btnToggleToolbar) {
+                this.dom.btnToggleToolbar.style.display = this.state.currentTab === 'notes' ? 'flex' : 'none';
+            }
         }
         window.scrollTo(0, 0);
     },
 
     switchTab(tabName) {
+        // Save current scroll position before switching
+        this.state.tabScrollPositions[this.state.currentTab] = window.scrollY;
+
         // Update Buttons
         this.dom.tabs.forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tabName);
@@ -517,6 +545,22 @@ const app = {
         this.dom.tabPanes.forEach(pane => {
             pane.classList.toggle('active', pane.id === `tab-${tabName}`);
         });
+
+        // Toggle toolbar toggle button visibility
+        if (this.dom.btnToggleToolbar) {
+            this.dom.btnToggleToolbar.style.display = tabName === 'notes' ? 'flex' : 'none';
+        }
+
+        // Update current tab state
+        this.state.currentTab = tabName;
+
+        // Restore saved scroll position for the target tab
+        const savedPos = this.state.tabScrollPositions[tabName];
+        
+        // Use a small delay to allow DOM to layout
+        setTimeout(() => {
+            window.scrollTo(0, savedPos);
+        }, 10);
     } ,
 
     // --- Selection & Excerpt Logic ---
